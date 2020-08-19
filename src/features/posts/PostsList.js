@@ -6,9 +6,10 @@ import {PostAuthor} from "./PostAuthor";
 import {TimeAgo} from "./TimeAgo";
 import {ReactionButtons} from "./ReactionButtons";
 
-import {selectAllPosts, fetchPosts} from "./postsSlice";
+import {fetchPosts, selectPostById, selectPostIds} from "./postsSlice";
 
-const PostExcerpt = ({post}) => {
+let PostExcerpt = ({postId}) => {
+    const post = useSelector(state => selectPostById(state, postId));
     return (
         <article className={'post-excerpt'} key={post.id}>
             <h3>{post.title}</h3>
@@ -25,7 +26,7 @@ const PostExcerpt = ({post}) => {
 
 export const PostsList = () => {
     const dispatch = useDispatch();
-    const posts = useSelector(selectAllPosts);
+    const orderedPostIds = useSelector(selectPostIds);
 
     const postStatus = useSelector(state => state.posts.status);
     const error = useSelector(state => state.posts.error);
@@ -41,9 +42,8 @@ export const PostsList = () => {
     if (postStatus === 'loading') {
         content = <div className={'loader'}>Loading...</div>
     } else if (postStatus === 'succeeded') {
-        const orderedPost = posts.slice().sort((a, b) => b.date.localeCompare(a.date));
-        content = orderedPost.map(post => (
-            <PostExcerpt key={post.id} post={post}/>
+        content = orderedPostIds.map(postId => (
+            <PostExcerpt key={postId} postId={postId}/>
         ))
     } else if (postStatus === 'failed') {
         content = <div>{error}</div>
